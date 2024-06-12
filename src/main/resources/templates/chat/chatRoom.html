@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Chat Room</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        .container {
+            background-color: #ffffff;
+            padding: 30px 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+            width: 400px;
+            text-align: center;
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+        input[type="text"] {
+            width: calc(100% - 20px);
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        button {
+            width: 100%;
+            padding: 12px;
+            margin: 15px 0;
+            border: none;
+            border-radius: 5px;
+            background-color: #28a745;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #218838;
+        }
+        .msgArea {
+            background-color: #f4f4f4;
+            padding: 10px;
+            border-radius: 5px;
+            height: 300px;
+            overflow-y: auto;
+            text-align: left;
+        }
+        .msgArea div {
+            padding: 5px 0;
+            border-bottom: 1px solid #ddd;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Chat Room</h1>
+    <input type="text" placeholder="보낼 메세지를 입력하세요." class="content">
+    <button type="button" class="sendBtn" onclick="sendMsg()">전송</button>
+    <button type="button" class="quit" onclick="quit()">방 나가기</button>
+    <div class="msgArea"></div>
+</div>
+
+<script th:inline="javascript">
+    /* 타임리프를 통해 서버로부터 사용자 이름과 방 ID를 전달받습니다 */
+    let username = /*[[${username}]]*/ 'defaultUsername';
+    let roomId = /*[[${room.roomId}]]*/ 'defaultRoomId';
+</script>
+
+<script>
+    function enterRoom(socket) {
+        var enterMsg = {"type": "ENTER", "roomId": roomId, "sender": username, "msg": ""};
+        socket.send(JSON.stringify(enterMsg));
+    }
+
+    let socket = new WebSocket("ws://localhost:8080/ws/chat");
+
+    socket.onopen = function (e) {
+        console.log('Connected to server!');
+        enterRoom(socket);
+    };
+
+    socket.onclose = function (e) {
+        console.log('Disconnected from server');
+    };
+
+    socket.onerror = function (e) {
+        console.log('Error: ', e);
+    };
+
+    // 메세지 수신했을 때 이벤트
+    socket.onmessage = function (e) {
+        console.log('Message received:', e.data);
+        let msgArea = document.querySelector('.msgArea');
+        let newMsg = document.createElement('div');
+        newMsg.innerText = e.data;
+        msgArea.append(newMsg);
+        msgArea.scrollTop = msgArea.scrollHeight; // 자동 스크롤
+    }
+
+    // 메세지 보내기 버튼 눌렀을 때
+    function sendMsg() {
+        let content = document.querySelector('.content').value;
+        if (content.trim() !== '') {
+            var talkMsg = {"type": "TALK", "roomId": roomId, "sender": username, "msg": content};
+            socket.send(JSON.stringify(talkMsg));
+            document.querySelector('.content').value = ''; // 입력 필드 초기화
+        }
+    }
+
+    function quit() {
+        var quitMsg = {"type": "QUIT", "roomId": roomId, "sender": username, "msg": ""};
+        socket.send(JSON.stringify(quitMsg));
+        socket.close();
+        location.href = "/chat/chatList";
+    }
+</script>
+
+</body>
+</html>
