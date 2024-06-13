@@ -1,0 +1,41 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <title>회원 가입</title>
+</head>
+<body style="font-family: Arial, sans-serif; background-color: #f0f0f0; margin: 0; padding: 0; display: flex; justify-content: center; align-items: center; height: 100vh;">
+<div style="background-color: #ffffff; padding: 30px 20px; border-radius: 10px; box-shadow: 0 0 15px rgba(0, 0, 0, 0.1); width: 400px; text-align: center;">
+    <div style="padding-bottom: 20px;">
+        <h2 style="color: #333; margin-bottom: 20px;">회원 가입</h2>
+    </div>
+    <h4 style="margin-bottom: 20px; color: #333;">회원 정보 입력</h4>
+    <form th:action="@{/member/add}" th:object="${member}" method="post">
+        <div style="margin-bottom: 10px;">
+            <label for="mbrId">로그인 ID</label>
+            <input type="text" id="mbrId" th:field="*{mbrId}" placeholder="Enter your ID" required style="width: calc(100% - 20px); padding: 10px; margin: 10px 0; border: 1px solid #ccc; border-radius: 5px; font-size: 16px;">
+        </div>
+        <div style="margin-bottom: 10px;">
+            <label for="mbrPw">비밀번호</label>
+            <input type="password" id="mbrPw" th:field="*{mbrPw}" placeholder="Enter your password" required style="width: calc(100% - 20px); padding: 10px; margin: 10px 0; border: 1px solid #ccc; border-radius: 5px; font-size: 16px;">
+        </div>
+        <div style="margin-bottom: 10px;">
+            <label for="mbrName">이름</label>
+            <input type="text" id="mbrName" th:field="*{mbrName}" placeholder="Enter your name" required style="width: calc(100% - 20px); padding: 10px; margin: 10px 0; border: 1px solid #ccc; border-radius: 5px; font-size: 16px;">
+        </div>
+        <hr style="margin: 20px 0;">
+        <div style="margin-bottom: 10px; display: flex; gap: 10px;">
+            <button type="submit"
+                    style="flex: 1; padding: 12px; border: none; border-radius: 5px; background-color: #007bff; color: white; font-size: 16px; cursor: pointer;"
+                    onmouseover="this.style.backgroundColor='#0056b3'"
+                    onmouseout="this.style.backgroundColor='#007bff'">회원 가입</button>
+            <button type="button"
+                    style="flex: 1; padding: 12px; border: none; border-radius: 5px; background-color: #6c757d; color: white; font-size: 16px; cursor: pointer;"
+                    onmouseover="this.style.backgroundColor='#5a6268'"
+                    onmouseout="this.style.backgroundColor='#6c757d'"
+                    onclick="location.href='/'" th:onclick="|location.href='@{/}'|">취소</button>
+        </div>
+    </form>
+</div>
+</body>
+</html>

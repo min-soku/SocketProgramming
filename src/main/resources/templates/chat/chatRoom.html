@@ -60,6 +60,20 @@
             padding: 5px 0;
             border-bottom: 1px solid #ddd;
         }
+        .msgArea .message {
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 5px;
+            background-color: #e0e0e0;
+        }
+        .msgArea .message.self {
+            text-align: right;
+            background-color: #d1ffd1;
+        }
+        .msgArea .message.other {
+            text-align: left;
+            background-color: #d1e0ff;
+        }
     </style>
 </head>
 <body>
@@ -80,7 +94,7 @@
 
 <script>
     function enterRoom(socket) {
-        var enterMsg = {"type": "ENTER", "roomId": roomId, "sender": username, "msg": ""};
+        var enterMsg = {"type": "ENTER", "roomId": roomId, "sender": username, "msg": username + "님이 입장했습니다."};
         socket.send(JSON.stringify(enterMsg));
     }
 
@@ -104,7 +118,10 @@
         console.log('Message received:', e.data);
         let msgArea = document.querySelector('.msgArea');
         let newMsg = document.createElement('div');
-        newMsg.innerText = e.data;
+        let message = JSON.parse(e.data);
+        newMsg.classList.add('message');
+        newMsg.classList.add(message.sender === username ? 'self' : 'other');
+        newMsg.innerHTML = "<strong>" + (message.sender || '알 수 없음') + ":</strong> " + (message.msg || '내용 없음');
         msgArea.append(newMsg);
         msgArea.scrollTop = msgArea.scrollHeight; // 자동 스크롤
     }
@@ -120,7 +137,7 @@
     }
 
     function quit() {
-        var quitMsg = {"type": "QUIT", "roomId": roomId, "sender": username, "msg": ""};
+        var quitMsg = {"type": "QUIT", "roomId": roomId, "sender": username, "msg": username + "님이 퇴장했습니다."};
         socket.send(JSON.stringify(quitMsg));
         socket.close();
         location.href = "/chat/chatList";

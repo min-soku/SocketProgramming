@@ -31,7 +31,16 @@ public class WebSockChatHandler extends TextWebSocketHandler {
     @Override
     protected void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
         String payload = message.getPayload();
+        log.info("Received message: {}", payload); // 로그 추가
+
+        // JSON 파싱을 시도하기 전에, 수동으로 확인
+        log.info("Payload before parsing: {}", payload);
+
         ChatMessage chatMessage = objectMapper.readValue(payload, ChatMessage.class);
+
+        // 파싱 후 필드 값을 개별적으로 로그 출력
+        log.info("ChatMessage parsed: type={}, roomId={}, sender={}, msg={}",
+                chatMessage.getType(), chatMessage.getRoomId(), chatMessage.getSender(), chatMessage.getMessage());
 
         try {
             ChatRoom room = chatService.findRoomById(chatMessage.getRoomId());
@@ -44,14 +53,14 @@ public class WebSockChatHandler extends TextWebSocketHandler {
 
             if (chatMessage.getType().equals(ChatMessage.MessageType.ENTER)) {
                 sessions.add(session);
-                chatMessage.setMessage(chatMessage.getSender() + "님이 입장했습니다.");
+                chatMessage.setMessage(chatMessage.getSender() + "님이 입장했습니다."); // msg 필드 설정
                 sendToEachSocket(sessions, new TextMessage(objectMapper.writeValueAsString(chatMessage)));
             } else if (chatMessage.getType().equals(ChatMessage.MessageType.QUIT)) {
                 sessions.remove(session);
-                chatMessage.setMessage(chatMessage.getSender() + "님이 퇴장했습니다.");
+                chatMessage.setMessage(chatMessage.getSender() + "님이 퇴장했습니다."); // msg 필드 설정
                 sendToEachSocket(sessions, new TextMessage(objectMapper.writeValueAsString(chatMessage)));
             } else {
-                sendToEachSocket(sessions, message);
+                sendToEachSocket(sessions, new TextMessage(objectMapper.writeValueAsString(chatMessage)));
             }
         } catch (Exception e) {
             log.error("Error handling message: {}", e.getMessage(), e);

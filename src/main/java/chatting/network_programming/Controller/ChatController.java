@@ -1,7 +1,10 @@
 package chatting.network_programming.Controller;
 
 import chatting.network_programming.DTO.ChatRoom;
+import chatting.network_programming.DTO.Member;
 import chatting.network_programming.Service.ChatService;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
@@ -21,6 +24,12 @@ import java.util.List;
 public class ChatController {
     private final ChatService chatService;
 
+    @GetMapping("home")
+    public String home(){
+        return"chat/home";
+    }
+
+
     @GetMapping("/chatList")
     public String chatList(Model model){
         List<ChatRoom> roomList = chatService.findAllRoom();
@@ -29,8 +38,11 @@ public class ChatController {
     }
 
     @PostMapping("/createRoom")
-    public String createRoom(Model model, @RequestParam("name") String name, @RequestParam("username") String username){
+    public String createRoom(Model model, @RequestParam("name") String name, HttpServletRequest request){
         log.info("채팅방 생성 메소드");
+        HttpSession session = request.getSession();
+        Member mbr = (Member) session.getAttribute("loginMbr");
+        String username = mbr.getMbrName();
         ChatRoom room = chatService.createRoom(name);
         model.addAttribute("room", room);
         model.addAttribute("username", username);
@@ -39,8 +51,11 @@ public class ChatController {
     }
 
     @GetMapping("/chatRoom")
-    public String chatRoom(Model model, @RequestParam("roomId") String roomId, @RequestParam("username") String username){
+    public String chatRoom(Model model, @RequestParam("roomId") String roomId, HttpServletRequest request){
         ChatRoom room = chatService.findRoomById(roomId);
+        HttpSession session = request.getSession();
+        Member mbr = (Member) session.getAttribute("loginMbr");
+        String username = mbr.getMbrName();
         model.addAttribute("room", room);
         model.addAttribute("username", username);
         return "chat/chatRoom";
